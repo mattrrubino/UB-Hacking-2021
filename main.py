@@ -1,29 +1,32 @@
-from flask import Flask
+from flask import Flask, request, abort
 from flask_cors import CORS
 import socket
+
 
 app = Flask(__name__)
 CORS(app)
 
-# TCP host name
-IP = ''
+# ClearCore private IP and TCP server port
+IP = '192.168.1.252'
 PORT = 12345
-MESSAGE = 'RAMEN'
+MESSAGE = 'R'.encode()
 
-@app.route('/')
-def main():
-    return "Hello"
 
 @app.route('/ramen', methods=['GET', 'POST'])
 def ramen():
-    # Intercept message contents
+    body = request.form['Body']
 
-    print("Ramen time!")
+    if body is None:
+        abort(400)
 
-    #with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    #    s.connect((IP, PORT))
-    #    s.send(MESSAGE)
+    if (not 'ramen' in body.lower()):
+        return "Message received."
 
-    return "Success"
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((IP, PORT))
+        s.send(MESSAGE)
+
+    return "Ramen ordered."
  
+
 app.run(host='192.168.1.179', port=80, debug=False)
